@@ -1,6 +1,6 @@
 # SIRI Client/Server
 
-Example-implementation of a SIRI Producer/Consumer with simple Publish/Subscribe support.
+Example-implementation of a SIRI Producer/Consumer with simple Publish/Subscribe support. The consumer creates a set of SIRI subscriptions with the publisher, and the producer then posts periodic heartbeats and mock-data to the consumer for each subscription.
 
 Note: This is not intended to be used as-is, but demonstrates the concepts and basic behaviour of a SIRI Publish/Subscribe-service.
 
