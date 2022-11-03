@@ -34,7 +34,7 @@ public class SiriHelper {
 
 
     //Simple indication of when server was started
-    private static Instant serverStartTime = Instant.now();
+    private static final Instant serverStartTime = Instant.now();
 
     public static Siri createSiriSxServiceDelivery(Collection<PtSituationElement> elements) {
         Siri siri = createSiriServiceDelivery();

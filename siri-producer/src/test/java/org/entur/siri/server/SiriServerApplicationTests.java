@@ -8,6 +8,7 @@ class SiriServerApplicationTests {
 
     @Test
     void contextLoads() {
+        //Ignore
     }
 
 }

@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class SubscriptionService {
 
     private static final long MONITOR_FREQUENCY_SECONDS = 10;
-    private static Logger LOG = LoggerFactory.getLogger(HttpHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SubscriptionService.class);
     @Value("${siri.server.endpoint:}")
     String siriEndpoint;
     @Value("${siri.subscription.enabled.sx:false}")
@@ -36,13 +36,21 @@ public class SubscriptionService {
     @Value("${siri.subscription.enabled.et:false}")
     boolean etSubscriptionEnabled;
 
-    @Autowired
-    SubscriptionRepository subscriptionRepository;
-    ScheduledExecutorService monitorService = Executors.newSingleThreadScheduledExecutor();
+    private final SubscriptionRepository subscriptionRepository;
+    final ScheduledExecutorService monitorService = Executors.newSingleThreadScheduledExecutor();
+    private final SiriHelper siriHelper;
+
+    public SubscriptionService(
+            @Autowired  SiriHelper siriHelper,
+            @Autowired SubscriptionRepository subscriptionRepository
+    ) {
+        this.siriHelper = siriHelper;
+        this.subscriptionRepository = subscriptionRepository;
+    }
 
     @PostConstruct
     private void initSubscriptionMonitor() {
-        monitorService.scheduleAtFixedRate(() -> checkSubscriptionStatus(),
+        monitorService.scheduleAtFixedRate(this::checkSubscriptionStatus,
                 MONITOR_FREQUENCY_SECONDS,
                 MONITOR_FREQUENCY_SECONDS,
                 TimeUnit.SECONDS);
@@ -94,7 +102,7 @@ public class SubscriptionService {
     }
 
     private void startSubscription(Subscription subscription) throws IOException, JAXBException {
-        Siri subscriptionRequest = SiriHelper.createSubscriptionRequest(subscription);
+        Siri subscriptionRequest = siriHelper.createSubscriptionRequest(subscription);
         int responseCode = HttpHelper.postData(siriEndpoint, SiriXml.toXml(subscriptionRequest));
         if (responseCode == 200) {
             subscription.markStarted();
@@ -105,7 +113,7 @@ public class SubscriptionService {
     }
 
     private void terminateSubscription(Subscription subscription) throws IOException, JAXBException {
-        Siri subscriptionRequest = SiriHelper.createTerminateSubscriptionRequest(subscription);
+        Siri subscriptionRequest = siriHelper.createTerminateSubscriptionRequest(subscription);
         int responseCode = HttpHelper.postData(siriEndpoint, SiriXml.toXml(subscriptionRequest));
         if (responseCode == 200) {
             subscriptionRepository.add(subscription);

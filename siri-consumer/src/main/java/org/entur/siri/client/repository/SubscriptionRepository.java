@@ -10,7 +10,7 @@ import java.util.Map;
 @Component
 public class SubscriptionRepository {
 
-    private Map<String, Subscription> subscriptionMap = new HashMap<>();
+    private final Map<String, Subscription> subscriptionMap = new HashMap<>();
 
     public void add(Subscription subscription) {
         subscriptionMap.put(subscription.subscriptionId, subscription);

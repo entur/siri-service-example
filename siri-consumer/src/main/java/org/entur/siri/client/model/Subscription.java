@@ -1,10 +1,6 @@
 package org.entur.siri.client.model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.Duration;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.StringJoiner;
 

@@ -5,16 +5,15 @@ import uk.org.siri.siri21.RequestorRef;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.StringJoiner;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class Subscription {
 
-    private ZonedDateTime requestTimestamp;
+    private final ZonedDateTime requestTimestamp;
     private final SiriDataType subscriptionType;
     private final String address;
     private final String subscriptionId;
-    private Duration heartbeatInterval;
-    private String requestorRef;
+    private final Duration heartbeatInterval;
+    private final String requestorRef;
 
     public Subscription(
             ZonedDateTime requestTimestamp,

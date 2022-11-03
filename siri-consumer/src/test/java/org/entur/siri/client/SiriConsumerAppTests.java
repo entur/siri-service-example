@@ -8,6 +8,7 @@ class SiriConsumerAppTests {
 
     @Test
     void contextLoads() {
+        //Ignore
     }
 
 }

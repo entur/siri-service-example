@@ -2,6 +2,8 @@ package org.entur.siri.client.util;
 
 import org.entur.siri.client.model.SiriDataType;
 import org.entur.siri.client.model.Subscription;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import uk.org.siri.siri21.EstimatedTimetableRequestStructure;
 import uk.org.siri.siri21.EstimatedTimetableSubscriptionStructure;
 import uk.org.siri.siri21.MessageQualifierStructure;
@@ -21,13 +23,17 @@ import javax.xml.datatype.DatatypeFactory;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+@Component
 public class SiriHelper {
 
+    private  final String SIRI_VERSION = "2.1";
+    private final String baseUrl;
 
-    private static final String SIRI_VERSION = "2.1";
-    private static final String BASE_URL = "http://localhost:8081/subscription/";
+    public SiriHelper(@Value("${siri.client.endpoint.baseurl:}") String baseUrl) {
+        this.baseUrl  = baseUrl;
+    }
 
-    public static Siri createSubscriptionRequest(Subscription subscription) {
+    public  Siri createSubscriptionRequest(Subscription subscription) {
         Siri siri = createSiriObject();
 
         SubscriptionRequest request = null;
@@ -47,7 +53,7 @@ public class SiriHelper {
     }
 
 
-    public static Siri createTerminateSubscriptionRequest(Subscription subscription) {
+    public  Siri createTerminateSubscriptionRequest(Subscription subscription) {
         Siri siri = createSiriObject();
         TerminateSubscriptionRequestStructure terminationReq = new TerminateSubscriptionRequestStructure();
 
@@ -60,7 +66,7 @@ public class SiriHelper {
         return siri;
     }
 
-    private static SubscriptionRequest createSituationExchangeSubscriptionRequest(Subscription subscription) {
+    private  SubscriptionRequest createSituationExchangeSubscriptionRequest(Subscription subscription) {
         SubscriptionRequest request = createSubscriptionRequest(createAddress(subscription.subscriptionId), subscription.getHeartbeatInterval(), subscription.requestorRef);
 
         SituationExchangeRequestStructure sxRequest = new SituationExchangeRequestStructure();
@@ -79,7 +85,7 @@ public class SiriHelper {
         return request;
     }
 
-    private static SubscriptionRequest createVehicleMonitoringSubscriptionRequest(Subscription subscription) {
+    private  SubscriptionRequest createVehicleMonitoringSubscriptionRequest(Subscription subscription) {
         SubscriptionRequest request = createSubscriptionRequest(
                 createAddress(subscription.subscriptionId),
                 subscription.getHeartbeatInterval(),
@@ -100,7 +106,7 @@ public class SiriHelper {
         return request;
     }
 
-    private static SubscriptionRequest createSubscriptionRequest(String address, String heartbeatInterval, String requestorRef) {
+    private  SubscriptionRequest createSubscriptionRequest(String address, String heartbeatInterval, String requestorRef) {
         SubscriptionRequest request = new SubscriptionRequest();
 
         request.setRequestorRef(createRequestorRef(requestorRef));
@@ -116,14 +122,14 @@ public class SiriHelper {
         return request;
     }
 
-    private static SubscriptionQualifierStructure createSubscriptionIdentifier(String subscriptionId) {
+    private  SubscriptionQualifierStructure createSubscriptionIdentifier(String subscriptionId) {
         SubscriptionQualifierStructure subId = new SubscriptionQualifierStructure();
         subId.setValue(subscriptionId);
         return subId;
     }
 
 
-    private static SubscriptionRequest createEstimatedTimetableSubscriptionRequest(Subscription subscription) {
+    private  SubscriptionRequest createEstimatedTimetableSubscriptionRequest(Subscription subscription) {
         SubscriptionRequest request = createSubscriptionRequest(
                 createAddress(subscription.subscriptionId),
                 subscription.getHeartbeatInterval(),
@@ -145,17 +151,17 @@ public class SiriHelper {
         return request;
     }
 
-    private static String createAddress(String subscriptionId) {
-        return BASE_URL + subscriptionId;
+    private  String createAddress(String subscriptionId) {
+        return baseUrl + subscriptionId;
     }
 
-    private static MessageQualifierStructure createMessageIdentifier(String id) {
+    private  MessageQualifierStructure createMessageIdentifier(String id) {
         MessageQualifierStructure messageQualifierStructure = new MessageQualifierStructure();
         messageQualifierStructure.setValue(id);
         return messageQualifierStructure;
     }
 
-    private static javax.xml.datatype.Duration createDuration(String durationStr) {
+    private  javax.xml.datatype.Duration createDuration(String durationStr) {
         try {
             return DatatypeFactory.newInstance().newDuration(durationStr);
         } catch (DatatypeConfigurationException e) {
@@ -163,13 +169,13 @@ public class SiriHelper {
         }
     }
 
-    private static RequestorRef createRequestorRef(String requestorRef) {
+    private  RequestorRef createRequestorRef(String requestorRef) {
         RequestorRef ref = new RequestorRef();
         ref.setValue(requestorRef);
         return ref;
     }
 
-    private static Siri createSiriObject() {
+    private  Siri createSiriObject() {
         Siri siri = new Siri();
         siri.setVersion("2.1");
         return siri;

@@ -12,20 +12,22 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import uk.org.siri.siri21.HeartbeatNotificationStructure;
 import uk.org.siri.siri21.Siri;
 
 import javax.xml.bind.JAXBException;
 
 @RestController
 public class SiriEndpoint {
-    private static Logger LOG = LoggerFactory.getLogger(SiriEndpoint.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SiriEndpoint.class);
 
     @Value("${verbose.xml:true}")
     private boolean verbose;
 
-    @Autowired
-    SubscriptionRepository subscriptionRepository;
+    private final SubscriptionRepository subscriptionRepository;
+
+    public SiriEndpoint(@Autowired SubscriptionRepository subscriptionRepository) {
+        this.subscriptionRepository = subscriptionRepository;
+    }
 
     @PostMapping(value = "/subscription/{id}", consumes = "application/xml")
     public ResponseEntity<Object> handleSubscriptionRequest(@PathVariable String id, @RequestBody Siri siriRequest) throws JAXBException {
@@ -35,7 +37,7 @@ public class SiriEndpoint {
             return ResponseEntity.notFound().build();
         }
 
-        if (false | verbose) {
+        if (verbose) {
             LOG.info(SiriXml.toXml(siriRequest));
         }
 

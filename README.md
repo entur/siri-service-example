@@ -8,13 +8,14 @@ Note: This is not intended to be used as-is, but demonstrates the concepts and b
 - Starts a SIRI server (on port `8080`) that accepts SIRI SubscriptionRequest
 - Keeps subscriptions alive by posting periodic heartbeats.
 - Periodically creates Mock SIRI-data that is published to relevant subscriptions.
-
+- Set `verbose.xml=true` in _application.properties_ to print all outbound XML
 
 ## Consumer
 - Starts a SIRI client (on port `8081`).
 - Initializes subscriptions towards the above.
 - Logs received data/heartbeats
 - Simple monitoring that subscriptions are healthy, and restarts subscriptions when necessary.
+- Set `verbose.xml=true` in _application.properties_ to print all in~~~~bound XML
 
 ## Usage
 Multimodule project that can be built from root.

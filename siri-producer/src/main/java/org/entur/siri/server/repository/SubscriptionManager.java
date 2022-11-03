@@ -2,6 +2,7 @@ package org.entur.siri.server.repository;
 
 import org.entur.siri.server.model.SiriDataType;
 import org.entur.siri.server.model.Subscription;
+import org.entur.siri.server.util.HttpHelper;
 import org.entur.siri.server.util.SiriHelper;
 import org.entur.siri21.util.SiriXml;
 import org.slf4j.Logger;
@@ -10,39 +11,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import uk.org.siri.siri21.Siri;
 
-import javax.xml.bind.JAXBException;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static org.entur.siri.server.util.HttpHelper.postData;
-import static org.entur.siri.server.util.HttpHelper.postHeartbeat;
-
 @Repository
 public class SubscriptionManager {
-    private static Logger LOG = LoggerFactory.getLogger(SubscriptionManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SubscriptionManager.class);
     private static final Integer MAX_FAILED_COUNTER = 5;
 
     private final Map<String, Subscription> subscriptions = new HashMap<>();
     private final Map<String, Integer> subscriptionFailCounter = new HashMap<>();
-    private Map<String, ScheduledExecutorService> heartbeatExecutors = new HashMap<>();
+    private final Map<String, ScheduledExecutorService> heartbeatExecutors = new HashMap<>();
 
-    @Autowired
-    private SiriETRepository siriETRepository;
-    @Autowired
-    private SiriVMRepository siriVMRepository;
-    @Autowired
-    private SiriSXRepository siriSXRepository;
+    private final SiriETRepository siriETRepository;
+    private final SiriVMRepository siriVMRepository;
+    private final SiriSXRepository siriSXRepository;
+
+    private final HttpHelper httpHelper;
+
+    public SubscriptionManager(
+            @Autowired SiriSXRepository siriSXRepository,
+            @Autowired SiriVMRepository siriVMRepository,
+            @Autowired SiriETRepository siriETRepository,
+            @Autowired HttpHelper httpHelper) {
+        this.siriSXRepository = siriSXRepository;
+        this.siriVMRepository = siriVMRepository;
+        this.siriETRepository = siriETRepository;
+        this.httpHelper = httpHelper;
+    }
+
     public void pushSiriToSubscribers(Siri siri) {
         LOG.info("Pushing data to {} subscribers.", subscriptions.size());
         if (!siri.getServiceDelivery().getVehicleMonitoringDeliveries().isEmpty()) {
             for (Subscription subscription : subscriptions.values()) {
                 if (subscription.getSubscriptionType() == SiriDataType.VM) {
                     try {
-                        postData(subscription.getAddress(), SiriXml.toXml(siri));
+                        httpHelper.postData(subscription.getAddress(), SiriXml.toXml(siri));
                     } catch (Exception e) {
                         // Ignore
                     }
@@ -53,7 +60,7 @@ public class SubscriptionManager {
             for (Subscription subscription : subscriptions.values()) {
                 if (subscription.getSubscriptionType() == SiriDataType.ET) {
                     try {
-                        postData(subscription.getAddress(), SiriXml.toXml(siri));
+                        httpHelper.postData(subscription.getAddress(), SiriXml.toXml(siri));
                     }  catch (Exception e) {
                         // Ignore
                     }
@@ -64,7 +71,7 @@ public class SubscriptionManager {
             for (Subscription subscription : subscriptions.values()) {
                 if (subscription.getSubscriptionType() == SiriDataType.SX) {
                     try {
-                        postData(subscription.getAddress(), SiriXml.toXml(siri));
+                        httpHelper.postData(subscription.getAddress(), SiriXml.toXml(siri));
                     }  catch (Exception e) {
                         // Ignore
                     }
@@ -88,7 +95,7 @@ public class SubscriptionManager {
         }
 
         try {
-            postData(subscription.getAddress(), SiriXml.toXml(initialDelivery));
+            httpHelper.postData(subscription.getAddress(), SiriXml.toXml(initialDelivery));
         } catch (Exception e) {
             LOG.warn("Initial delivery failed to address {}", subscription.getAddress());
             // Ignore
@@ -121,7 +128,7 @@ public class SubscriptionManager {
 
                             LOG.info("Posting heartbeat to {}", subscription);
 
-                            int responseCode = postHeartbeat(subscription.getAddress(), subscription.getSubscriptionId());
+                            int responseCode = httpHelper.postHeartbeat(subscription.getAddress(), subscription.getSubscriptionId());
                             if (responseCode != 200) {
                                 markFailed(subscription);
                             }

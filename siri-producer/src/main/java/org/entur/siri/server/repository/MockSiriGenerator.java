@@ -1,6 +1,7 @@
 package org.entur.siri.server.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.org.siri.siri21.AffectedLineStructure;
 import uk.org.siri.siri21.AffectsScopeStructure;
@@ -38,36 +39,62 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class MockSiriGenerator {
 
-    private static final int SX_GENERATE_FREQUENCY_SECONDS = 300;
-    private static final int ET_GENERATE_FREQUENCY_SECONDS = 30;
-    private static final int VM_GENERATE_FREQUENCY_SECONDS = 3;
 
-    @Autowired
-    private SiriETRepository siriETRepository;
-    @Autowired
-    private SiriVMRepository siriVMRepository;
-    @Autowired
-    private SiriSXRepository siriSXRepository;
-    @Autowired
-    private SubscriptionManager subscriptionManager;
+    @Value("${siri.mock.enabled.sx:false}")
+    private boolean mockSx;
+    @Value("${siri.mock.frequency.sx:300}")
+    private int SX_GENERATE_FREQUENCY_SECONDS;
 
-    ScheduledExecutorService mockExecutorService = Executors.newSingleThreadScheduledExecutor();
+    @Value("${siri.mock.enabled.et:false}")
+    private boolean mockEt;
+    @Value("${siri.mock.frequency.et:30}")
+    private int ET_GENERATE_FREQUENCY_SECONDS;
+
+
+    @Value("${siri.mock.enabled.vm:false}")
+    private boolean mockVm;
+    @Value("${siri.mock.frequency.vm:3}")
+    private int VM_GENERATE_FREQUENCY_SECONDS;
+
+    private final SiriETRepository siriETRepository;
+    private final SiriVMRepository siriVMRepository;
+    private final SiriSXRepository siriSXRepository;
+    private final SubscriptionManager subscriptionManager;
+
+    final ScheduledExecutorService mockExecutorService = Executors.newSingleThreadScheduledExecutor();
+
+    public MockSiriGenerator(
+            @Autowired SubscriptionManager subscriptionManager,
+            @Autowired SiriSXRepository siriSXRepository,
+            @Autowired SiriVMRepository siriVMRepository,
+            @Autowired SiriETRepository siriETRepository) {
+        this.subscriptionManager = subscriptionManager;
+        this.siriSXRepository = siriSXRepository;
+        this.siriVMRepository = siriVMRepository;
+        this.siriETRepository = siriETRepository;
+    }
 
     @PostConstruct
     private void initMockDataGenerator() {
         ZonedDateTime startTime = ZonedDateTime.now();
-        mockExecutorService.scheduleAtFixedRate(() -> siriETRepository.add(createMockEstimatedVehicleData(startTime), subscriptionManager),
-                        0,
-                        ET_GENERATE_FREQUENCY_SECONDS,
-                        TimeUnit.SECONDS);
-        mockExecutorService.scheduleAtFixedRate(() -> siriVMRepository.add(createMockVehicleMonitoringData(), subscriptionManager),
-                        0,
-                        VM_GENERATE_FREQUENCY_SECONDS,
-                        TimeUnit.SECONDS);
-        mockExecutorService.scheduleAtFixedRate(() -> siriSXRepository.add(createMockPtSituationData(startTime), subscriptionManager),
-                        0,
-                        SX_GENERATE_FREQUENCY_SECONDS,
-                        TimeUnit.SECONDS);
+        if (mockEt) {
+            mockExecutorService.scheduleAtFixedRate(() -> siriETRepository.add(createMockEstimatedVehicleData(startTime), subscriptionManager),
+                    0,
+                    ET_GENERATE_FREQUENCY_SECONDS,
+                    TimeUnit.SECONDS);
+        }
+        if (mockVm) {
+            mockExecutorService.scheduleAtFixedRate(() -> siriVMRepository.add(createMockVehicleMonitoringData(), subscriptionManager),
+                    0,
+                    VM_GENERATE_FREQUENCY_SECONDS,
+                    TimeUnit.SECONDS);
+        }
+        if (mockSx) {
+            mockExecutorService.scheduleAtFixedRate(() -> siriSXRepository.add(createMockPtSituationData(startTime), subscriptionManager),
+                    0,
+                    SX_GENERATE_FREQUENCY_SECONDS,
+                    TimeUnit.SECONDS);
+        }
     }
 
     private PtSituationElement createMockPtSituationData(ZonedDateTime creationTime) {
@@ -150,7 +177,7 @@ public class MockSiriGenerator {
         try {
             delay = DatatypeFactory.newInstance().newDuration("PT14S");
         } catch (DatatypeConfigurationException e) {
-            throw new RuntimeException(e);
+            // Ignore
         }
         monitoredVehicleJourney.setDelay(delay);
 

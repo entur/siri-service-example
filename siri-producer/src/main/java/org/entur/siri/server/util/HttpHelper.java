@@ -10,26 +10,36 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.entur.siri21.util.SiriXml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import uk.org.siri.siri21.Siri;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 
+@Component
 public class HttpHelper {
     private static final int SOCKET_TIMEOUT = 5000;
     private static final int CONN_TIMEOUT = 10000;
-    private static Logger LOG = LoggerFactory.getLogger(HttpHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpHelper.class);
 
-    public static int postHeartbeat(String address, String requestorRef) throws JAXBException, IOException {
+    @Value("${verbose.xml:true}")
+    private boolean verbose;
+
+    public int postHeartbeat(String address, String requestorRef) throws JAXBException, IOException {
         Siri siri = SiriHelper.createHeartbeatNotification(requestorRef);
 
         return postData(address, SiriXml.toXml(siri));
     }
 
-    public static int postData(String url, String xmlData) throws IOException {
+    public int postData(String url, String xmlData) throws IOException {
         HttpPost httppost = new HttpPost(url);
         if (xmlData != null) {
             httppost.setEntity(new StringEntity(xmlData, ContentType.APPLICATION_XML));
+        }
+
+        if (verbose) {
+            LOG.info(xmlData);
         }
 
         RequestConfig config = RequestConfig.custom()

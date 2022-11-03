@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class SiriRepository<T> {
-    private static Logger LOG = LoggerFactory.getLogger(HttpHelper.class);
-    protected Map<String, T> siriData = new HashMap<>();
+    private static final Logger LOG = LoggerFactory.getLogger(SiriRepository.class);
+    protected final Map<String, T> siriData = new HashMap<>();
 
     public Collection<T> getAll(){
         return siriData.values();

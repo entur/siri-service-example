@@ -30,17 +30,24 @@ import java.util.List;
 @RestController
 public class SiriEndpoint {
 
-    @Autowired
-    SubscriptionManager subscriptionManager;
+    private final SubscriptionManager subscriptionManager;
 
-    @Autowired
-    private SiriETRepository siriETRepository;
+    private final SiriETRepository siriETRepository;
 
-    @Autowired
-    private SiriVMRepository siriVMRepository;
+    private final SiriVMRepository siriVMRepository;
 
-    @Autowired
-    private SiriSXRepository siriSXRepository;
+    private final SiriSXRepository siriSXRepository;
+
+    public SiriEndpoint(
+            @Autowired SubscriptionManager subscriptionManager,
+            @Autowired SiriSXRepository siriSXRepository,
+            @Autowired SiriVMRepository siriVMRepository,
+            @Autowired SiriETRepository siriETRepository) {
+        this.subscriptionManager = subscriptionManager;
+        this.siriSXRepository = siriSXRepository;
+        this.siriVMRepository = siriVMRepository;
+        this.siriETRepository = siriETRepository;
+    }
 
     @PostMapping(value = "/subscribe", produces = "application/xml", consumes = "application/xml")
     public String handleSubscriptionRequest(@RequestBody Siri siriRequest) throws JAXBException {
