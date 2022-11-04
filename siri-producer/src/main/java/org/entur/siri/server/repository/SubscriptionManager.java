@@ -103,10 +103,11 @@ public class SubscriptionManager {
 
         LOG.info("Added subscription: {}, now have {} subscriptions", subscription, subscriptions.size());
     }
-    public void removeSubscription(String subscriptionId) {
+    public void terminateSubscription(String subscriptionId) {
         subscriptions.remove(subscriptionId);
         subscriptionFailCounter.remove(subscriptionId);
         stopHeartbeat(subscriptionId);
+        LOG.info("Subscription terminated: {}", subscriptionId);
     }
 
     private void stopHeartbeat(String subscriptionId) {
@@ -123,7 +124,7 @@ public class SubscriptionManager {
                     try {
                         if (hasFailed(subscription)) {
                             LOG.warn("Subscription has failed {} times, removing.", subscriptionFailCounter.get(subscription.getSubscriptionId()));
-                            removeSubscription(subscription.getSubscriptionId());
+                            terminateSubscription(subscription.getSubscriptionId());
                         } else {
 
                             LOG.info("Posting heartbeat to {}", subscription);

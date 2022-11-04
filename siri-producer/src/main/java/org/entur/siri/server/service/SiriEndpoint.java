@@ -50,9 +50,6 @@ public class SiriEndpoint {
     @PostMapping(value = "/subscribe", produces = "application/xml", consumes = "application/xml")
     public Siri handleSubscriptionRequest(@RequestBody Siri siriRequest) {
         SubscriptionRequest subscriptionRequest = siriRequest.getSubscriptionRequest();
-        if (subscriptionRequest == null && siriRequest.getTerminateSubscriptionRequest() != null) {
-            return handleTerminateSubscriptionRequest(siriRequest);
-        }
 
         String address = subscriptionRequest.getConsumerAddress();
         if (address == null) { // Fallback to Address
@@ -75,7 +72,7 @@ public class SiriEndpoint {
     @PostMapping(value = "/unsubscribe", produces = "application/xml", consumes = "application/xml")
     public Siri handleTerminateSubscriptionRequest(@RequestBody Siri siriRequest) {
         TerminateSubscriptionRequestStructure terminateSubscriptionRequest = siriRequest.getTerminateSubscriptionRequest();
-        subscriptionManager.removeSubscription(terminateSubscriptionRequest.getSubscriptionReves().get(0).getValue());
+        subscriptionManager.terminateSubscription(terminateSubscriptionRequest.getSubscriptionReves().get(0).getValue());
         return SiriHelper.createTerminateSubscriptionResponse(terminateSubscriptionRequest);
     }
 
