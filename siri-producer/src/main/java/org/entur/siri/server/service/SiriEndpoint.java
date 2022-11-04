@@ -6,7 +6,6 @@ import org.entur.siri.server.repository.SiriSXRepository;
 import org.entur.siri.server.repository.SiriVMRepository;
 import org.entur.siri.server.repository.SubscriptionManager;
 import org.entur.siri.server.util.SiriHelper;
-import org.entur.siri21.util.SiriXml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +20,6 @@ import uk.org.siri.siri21.SubscriptionRequest;
 import uk.org.siri.siri21.TerminateSubscriptionRequestStructure;
 import uk.org.siri.siri21.VehicleMonitoringRequestStructure;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.datatype.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,7 +48,7 @@ public class SiriEndpoint {
     }
 
     @PostMapping(value = "/subscribe", produces = "application/xml", consumes = "application/xml")
-    public String handleSubscriptionRequest(@RequestBody Siri siriRequest) throws JAXBException {
+    public Siri handleSubscriptionRequest(@RequestBody Siri siriRequest) {
         SubscriptionRequest subscriptionRequest = siriRequest.getSubscriptionRequest();
         if (subscriptionRequest == null && siriRequest.getTerminateSubscriptionRequest() != null) {
             return handleTerminateSubscriptionRequest(siriRequest);
@@ -71,19 +69,19 @@ public class SiriEndpoint {
                 requestorRef
                 );
         subscriptionManager.addSubscription(subscription);
-        return SiriXml.toXml(SiriHelper.createSubscriptionResponse(subscription.getSubscriptionId()));
+        return SiriHelper.createSubscriptionResponse(subscription.getSubscriptionId());
     }
 
     @PostMapping(value = "/unsubscribe", produces = "application/xml", consumes = "application/xml")
-    public String handleTerminateSubscriptionRequest(@RequestBody Siri siriRequest) throws JAXBException {
+    public Siri handleTerminateSubscriptionRequest(@RequestBody Siri siriRequest) {
         TerminateSubscriptionRequestStructure terminateSubscriptionRequest = siriRequest.getTerminateSubscriptionRequest();
         subscriptionManager.removeSubscription(terminateSubscriptionRequest.getSubscriptionReves().get(0).getValue());
-        return SiriXml.toXml(SiriHelper.createTerminateSubscriptionResponse(terminateSubscriptionRequest));
+        return SiriHelper.createTerminateSubscriptionResponse(terminateSubscriptionRequest);
     }
 
 
     @PostMapping(value = "/service", produces = "application/xml", consumes = "application/xml")
-    public String handleServiceRequest(@RequestBody Siri siriRequest) throws JAXBException {
+    public Siri handleServiceRequest(@RequestBody Siri siriRequest) {
         ServiceRequest serviceRequest = siriRequest.getServiceRequest();
 
         List<SituationExchangeRequestStructure> situationExchangeRequests = serviceRequest.getSituationExchangeRequests();
@@ -96,6 +94,6 @@ public class SiriEndpoint {
         // TODO: Handle request for ET
 
         Collection<EstimatedVehicleJourney> siriEtElements = new ArrayList<>();
-        return SiriXml.toXml(SiriHelper.createSiriEtServiceDelivery(siriEtElements));
+        return SiriHelper.createSiriEtServiceDelivery(siriEtElements);
     }
 }
