@@ -26,7 +26,7 @@ Multimodule project that can be built from root.
 Default properties may be overidden by specifying new values when starting the applications. They should be specified in the format `--<property.name>=<property.value>`. This will then override the property set in `application.properties`.
 
 E.g. to start the applications with verbose xml output, the parameter `verbose.xml` should be set to `true`. This can be specified on the commandline like.
-``` ~~~~
+```
 java -jar siri-producer/target/siri-producer-0.0.1-SNAPSHOT.jar --verbose.xml=true
 ```
 
