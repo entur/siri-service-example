@@ -8,7 +8,6 @@ Note: This is not intended to be used as-is, but demonstrates the concepts and b
 - Starts a SIRI server (on port `8080`) that accepts SIRI SubscriptionRequest
 - Keeps subscriptions alive by posting periodic heartbeats.
 - Periodically creates Mock SIRI-data that is published to relevant subscriptions.
-- Set `verbose.xml=true` in _application.properties_ to print all outbound XML
 - Parameters can be overridden bye specifying them on the commandline when starting up.
     - E.g. adding `--verbose.xml=true` to the startup-command will log all outbound xml
 
