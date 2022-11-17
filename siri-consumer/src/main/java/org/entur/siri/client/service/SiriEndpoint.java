@@ -44,11 +44,11 @@ public class SiriEndpoint {
         Subscription subscription = subscriptionRepository.get(id);
 
         if (siriRequest.getHeartbeatNotification() != null) {
-            LOG.info("Received HeartbeatNotification: {}", subscription);
             subscription.markHeartbeatReceived();
+            LOG.info("Received HeartbeatNotification: {}", subscription);
         } else if (siriRequest.getServiceDelivery() != null) {
-            LOG.info("Received SIRI ServiceDelivery: {}", subscription);
             subscription.markDataReceived();
+            LOG.info("Received SIRI ServiceDelivery: {}", subscription);
         }
 
 
